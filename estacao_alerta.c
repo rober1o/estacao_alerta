@@ -65,7 +65,7 @@ void vAtualizarDisplay(void *params) // Tarefa para atualizar o display
 
         if (valor_chuva >= 80 || valor_agua >= 70) // Caso ou a agua ou  achuva passem dos valores normais, imprime a mensagem arleta no display
         {
-            snprintf(buffer, sizeof(buffer), "ALERTA!!");
+            snprintf(buffer, sizeof(buffer), "Critical!!");
             ssd1306_draw_string(&ssd, buffer, 40, 48);
         }
         else // caso contrario o display mostrará o modo normal
@@ -114,7 +114,7 @@ void vTocarBuzzer()
 
         if (valor_chuva >= 80)
         {
-            tocar_pwm_buzzer(BUZZER_B, 100); // se o chuva da água for maior que 80%, tocará o buzzer B por 100 ms
+            tocar_pwm_buzzer(BUZZER_B, 50); // se o chuva da água for maior que 80%, tocará o buzzer B por 100 ms
         }
     }
 }
