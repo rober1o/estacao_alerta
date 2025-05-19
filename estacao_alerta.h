@@ -45,9 +45,8 @@
 #define LED_VERDE 11
 #define LED_VERMELHO 13
 #define LED_AZUL 12
-#define BOTAO_A 5
-// definições Joystick
 
+// definições Joystick
 #define ADC_JOYSTICK_Y 27
 #define ADC_JOYSTICK_X 28
 
@@ -63,21 +62,27 @@ QueueHandle_t nivel_chuva_led;
 QueueHandle_t nivel_agua_led;
 QueueHandle_t nivel_chuva_matriz;
 QueueHandle_t nivel_agua_matriz;
-int uso_chuva = 0;
-bool uso_agua = 0;
-bool modo_noturno = false;
 
-void inicializar_pinos_adc();
-void vAcionarBotao(void *pvParameters);
-void vTaskLed();
-void vAtualizarDisplay();
-void vTocarBuzzer(void *params);
-void tocar_pwm_buzzer(uint gpio_pin, uint duracao_ms);
+//DECLARAÇÃO FUNÇÕES DE INICALIZAÇÃO
 void configurar_matriz_leds();
+void inicializar_pinos_adc();
 void inicializar_display_i2c();
 void inicializar_leds();
+
+// DECLARAÇÃO DAS TAREFAS
+void vLerJoystick();
+void vAtualizarDisplay();
+void vTocarBuzzer();
+void vTaskLed();
+void vTaskMatriz();
+
+//DECLARAÇÃO FUNÇÕES AUXILIARES
+void gpio_irq_handler(uint gpio, uint32_t events);
+void desenha_fig(uint32_t *_matriz, uint8_t _intensidade, PIO pio, uint sm);
+void inicializar_pwms_buzzers();
+void draw_ssd1306(uint32_t *_matriz);
+void tocar_pwm_buzzer(uint gpio_pin, uint duracao_ms);
 void piscar_led_azul();
 void piscar_led_vermelho();
-void desenha_fig(uint32_t *_matriz, uint8_t _intensidade, PIO pio, uint sm);
-void draw_ssd1306(uint32_t *_matriz);
+
 #endif // ESTACAO_ALERTA

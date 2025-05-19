@@ -5,8 +5,9 @@
                       TAREFAS
 
 ****************************************************** */
-void vLerJoystick(void *params)
+void vLerJoystick()
 {
+    inicializar_pinos_adc();
     while (true)
     {
         // Eixo Y (ADC 0)
@@ -88,8 +89,9 @@ void vAtualizarDisplay(void *params)
     }
 }
 
-void vTocarBuzzer(void *params)
+void vTocarBuzzer()
 {
+    inicializar_pwms_buzzers();
     int valor_chuva = 0;
     int valor_agua = 0;
 
@@ -117,8 +119,9 @@ void vTocarBuzzer(void *params)
     }
 }
 
-void vTaskLed(void *params)
+void vTaskLed()
 {
+    inicializar_leds();
     int valor_chuva = 0;
     int valor_agua = 0;
 
@@ -146,8 +149,9 @@ void vTaskLed(void *params)
     }
 }
 
-void vTaskMatriz(void *params)
+void vTaskMatriz()
 {
+    configurar_matriz_leds();
     int valor_chuva = 0;
     int valor_agua = 0;
 
@@ -345,7 +349,6 @@ void tocar_pwm_buzzer(uint gpio_pin, uint duracao_ms)
     pwm_set_enabled(slice_num, true);
     vTaskDelay(pdMS_TO_TICKS(duracao_ms));
     pwm_set_enabled(slice_num, false);
-    printf("vTocarBuzzer rodando\n");
 }
 
 void piscar_led_vermelho()
@@ -366,9 +369,9 @@ void piscar_led_azul()
 
 int main()
 {
-    inicializar_pwms_buzzers();
-    inicializar_leds();
-    configurar_matriz_leds();
+
+    
+
     // Para ser utilizado o modo BOOTSEL com botão B
     gpio_init(botaoB);
     gpio_set_dir(botaoB, GPIO_IN);
@@ -376,7 +379,7 @@ int main()
     gpio_set_irq_enabled_with_callback(botaoB, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
     // Fim do trecho para modo BOOTSEL com botão B
     stdio_init_all();
-    inicializar_pinos_adc();
+
     // RODA AS 4 TAREFAS DO SISTEMA
     nivel_chuva_display = xQueueCreate(10, sizeof(int));
     nivel_agua_display = xQueueCreate(10, sizeof(int));
