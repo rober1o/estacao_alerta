@@ -65,7 +65,7 @@ void vAtualizarDisplay(void *params) // Tarefa para atualizar o display
 
         if (valor_chuva >= 80 || valor_agua >= 70) // Caso ou a agua ou  achuva passem dos valores normais, imprime a mensagem arleta no display
         {
-            snprintf(buffer, sizeof(buffer), "Critical!!");
+            snprintf(buffer, sizeof(buffer), "ALERTA!!");
             ssd1306_draw_string(&ssd, buffer, 40, 48);
         }
         else // caso contrario o display mostrará o modo normal
