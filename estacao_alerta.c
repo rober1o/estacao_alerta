@@ -109,7 +109,7 @@ void vTocarBuzzer()
         // Checar condições para tocar buzzer
         if (valor_agua >= 70)
         {
-            tocar_pwm_buzzer(BUZZER_A, 100);
+            tocar_pwm_buzzer(BUZZER_A, 200);
         }
 
         if (valor_chuva >= 80)
@@ -296,20 +296,21 @@ void inicializar_display_i2c()
 
 void inicializar_pwms_buzzers()
 {
-    // Buzzer A
+    // Buzzer A - grave audível (~2 kHz)
     gpio_set_function(BUZZER_A, GPIO_FUNC_PWM);
     uint slice_a = pwm_gpio_to_slice_num(BUZZER_A);
-    pwm_set_wrap(slice_a, 25000);                                     // Exemplo freq ~500 Hz
-    pwm_set_chan_level(slice_a, pwm_gpio_to_channel(BUZZER_A), 6250); // Duty 25%
-    pwm_set_enabled(slice_a, false);                                  // Começa desligado
+    pwm_set_wrap(slice_a, 62499);
+    pwm_set_chan_level(slice_a, pwm_gpio_to_channel(BUZZER_A), 31250);
+    pwm_set_enabled(slice_a, false);
 
-    // Buzzer B
+    // Buzzer B - agudo (~5 kHz)
     gpio_set_function(BUZZER_B, GPIO_FUNC_PWM);
     uint slice_b = pwm_gpio_to_slice_num(BUZZER_B);
-    pwm_set_wrap(slice_b, 12500);                                     // Exemplo freq ~1000 Hz
-    pwm_set_chan_level(slice_b, pwm_gpio_to_channel(BUZZER_B), 9375); // Duty 75%
-    pwm_set_enabled(slice_b, false);                                  // Começa desligado
+    pwm_set_wrap(slice_b, 24999);
+    pwm_set_chan_level(slice_b, pwm_gpio_to_channel(BUZZER_B), 12500);
+    pwm_set_enabled(slice_b, false);
 }
+
 
 void draw_ssd1306(uint32_t *_matriz)
 { // FUNÇÃO PARA DESENHAR NO DISPLAY COM O CÓDIGO EXPORTADO DO PISKEL
@@ -369,8 +370,6 @@ void piscar_led_azul()
 
 int main()
 {
-
-    
 
     // Para ser utilizado o modo BOOTSEL com botão B
     gpio_init(botaoB);
