@@ -75,4 +75,4 @@ Quando o nível de chuva for igual ou superior a 80% e de água igual ou supeiro
 ## Demonstração
 
 <!-- TODO: adicionar link do vídeo -->
-Vídeo demonstrando as funcionalidades da solução implementada: [Demonstração](https://youtu.be/nhr6UkEngDA)
+Vídeo demonstrando as funcionalidades da solução implementada: [Demonstração](https://youtu.be/rlCmV45Yfp4)
