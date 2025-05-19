@@ -7,20 +7,20 @@
 ****************************************************** */
 void vLerJoystick()
 {
-    inicializar_pinos_adc();
+    inicializar_pinos_adc(); // tarefa para receber o valores do joystick
     while (true)
     {
         // Eixo Y (ADC 0)
         adc_select_input(0);
         uint16_t y_pos = adc_read();
-        int percentual_y = (y_pos * 100) / 4095;
+        int percentual_y = (y_pos * 100) / 4095; // pós calcular o percentual de y, passa para as 4 filas do nivel da chuva
         xQueueSend(nivel_chuva_display, &percentual_y, portMAX_DELAY);
         xQueueSend(nivel_chuva_buzzer, &percentual_y, portMAX_DELAY);
         xQueueSend(nivel_chuva_led, &percentual_y, portMAX_DELAY);
         xQueueSend(nivel_chuva_matriz, &percentual_y, portMAX_DELAY);
         adc_select_input(1);
         uint16_t x_pos = adc_read();
-        int percentual_x = (x_pos * 100) / 4095;
+        int percentual_x = (x_pos * 100) / 4095; // pós calcular o percentual de x, passa para as 4 filas do nivel da água
         xQueueSend(nivel_agua_display, &percentual_x, portMAX_DELAY);
         xQueueSend(nivel_agua_buzzer, &percentual_x, portMAX_DELAY);
         xQueueSend(nivel_agua_led, &percentual_x, portMAX_DELAY);
@@ -29,9 +29,9 @@ void vLerJoystick()
     }
 }
 
-void vAtualizarDisplay(void *params)
+void vAtualizarDisplay(void *params) // Tarefa para atualizar o display
 {
-    inicializar_display_i2c();
+    inicializar_display_i2c(); // inicializa o i2c
 
     int valor_chuva = 0;
     int valor_agua = 0;
@@ -47,39 +47,39 @@ void vAtualizarDisplay(void *params)
 
         // Atualiza display
         ssd1306_fill(&ssd, false);
-        if (valor_chuva >= 80 && valor_agua >= 70)
+        if (valor_chuva >= 80 && valor_agua >= 70) // Caso o nivel da agua seja maior que 70% e o da chuva seja maior que 80%, imprime uma caveira como sinal de alerta crítico
         {
             ssd1306_fill(&ssd, false);
             draw_ssd1306(caveira);
         }
-        else if (valor_chuva >= 80)
+        else if (valor_chuva >= 80) // caso somente a chuva tenha valor acima de 80%, imprime uma nuvem simbolizando alerta de chuva
         {
             ssd1306_fill(&ssd, false);
             draw_ssd1306(chuva);
         }
-        else if (valor_agua >= 70)
+        else if (valor_agua >= 70) // caso somente a chuva tenha valor acima de 70%, imprime uma casa imundada simbolizando alerta de enchente
         {
             ssd1306_fill(&ssd, false);
             draw_ssd1306(agua);
         }
 
-        if (valor_chuva >= 80 || valor_agua >= 70)
+        if (valor_chuva >= 80 || valor_agua >= 70) // Caso ou a agua ou  achuva passem dos valores normais, imprime a mensagem arleta no display
         {
             snprintf(buffer, sizeof(buffer), "ALERTA!!");
-            ssd1306_draw_string(&ssd, buffer, 40, 48); // <-- Adicionado aqui
+            ssd1306_draw_string(&ssd, buffer, 40, 48);
         }
-        else
+        else // caso contrario o display mostrará o modo normal
         {
             snprintf(buffer, sizeof(buffer), "NORMAL");
-            ssd1306_draw_string(&ssd, buffer, 40, 48); // <-- Adicionado aqui
+            ssd1306_draw_string(&ssd, buffer, 40, 48);
         }
 
         ssd1306_rect(&ssd, 3, 3, 122, 60, true, false);
 
-        snprintf(buffer, sizeof(buffer), "CHV: %d%%", valor_chuva);
+        snprintf(buffer, sizeof(buffer), "CHV: %d%%", valor_chuva); // imprime o nivel da chuva no display
         ssd1306_draw_string(&ssd, buffer, 12, 9);
 
-        snprintf(buffer, sizeof(buffer), "AG: %d%%", valor_agua);
+        snprintf(buffer, sizeof(buffer), "AG: %d%%", valor_agua); // imprime o nivel da água no display
         ssd1306_draw_string(&ssd, buffer, 12, 25);
         ssd1306_rect(&ssd, 40, 4, 121, 1, true, false);
         ssd1306_rect(&ssd, 4, 80, 1, 37, true, false);
@@ -91,7 +91,7 @@ void vAtualizarDisplay(void *params)
 
 void vTocarBuzzer()
 {
-    inicializar_pwms_buzzers();
+    inicializar_pwms_buzzers(); // inicializa dos dois buzzers, cada um com frequencia direfente
     int valor_chuva = 0;
     int valor_agua = 0;
 
@@ -109,12 +109,12 @@ void vTocarBuzzer()
         // Checar condições para tocar buzzer
         if (valor_agua >= 70)
         {
-            tocar_pwm_buzzer(BUZZER_A, 200);
+            tocar_pwm_buzzer(BUZZER_A, 200); // se o nivel da água for maior que 70%, tocará o buzzer A por 200ms
         }
 
         if (valor_chuva >= 80)
         {
-            tocar_pwm_buzzer(BUZZER_B, 100);
+            tocar_pwm_buzzer(BUZZER_B, 100); // se o chuva da água for maior que 80%, tocará o buzzer B por 100 ms
         }
     }
 }
@@ -136,12 +136,12 @@ void vTaskLed()
             continue;
         }
 
-        // Checar condições para tocar buzzer
+        // se o nivel da água for maior que 70%, piscará o led vermelho com periodo de 100ms
         if (valor_agua >= 70)
         {
             piscar_led_vermelho();
         }
-
+        // se o nivel da chuva for maior que 80%, piscará o led vermelho com periodo de 100ms
         if (valor_chuva >= 80)
         {
             piscar_led_azul();
@@ -151,7 +151,7 @@ void vTaskLed()
 
 void vTaskMatriz()
 {
-    configurar_matriz_leds();
+    configurar_matriz_leds(); // inicializa e configura o PIO da matriz de leds
     int valor_chuva = 0;
     int valor_agua = 0;
 
@@ -165,20 +165,20 @@ void vTaskMatriz()
             vTaskDelay(pdMS_TO_TICKS(100));
             continue;
         }
-
+        // se o nivel da água for maior que 70%, e a chuva for maior que 80%, piscará um x na matriz com periodo de 100ms
         if (valor_agua >= 70 && valor_chuva >= 80)
         {
             desenha_fig(alerta_critico, BRILHO_PADRAO, pio, sm);
             vTaskDelay(pdMS_TO_TICKS(50));
             desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
-        else if (valor_agua >= 70)
+        else if (valor_agua >= 70)// se o nivel da água for maior que 70%, piscará uma exclamação na matriz com periodo de 100ms
         {
             desenha_fig(alerta_agua, BRILHO_PADRAO, pio, sm);
             vTaskDelay(pdMS_TO_TICKS(50));
             desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
-        else if (valor_chuva >= 80)
+        else if (valor_chuva >= 80)// se o nivel da chuva for maior que 80%, piscará um quadrado na matriz com periodo de 100ms
         {
             desenha_fig(alerta_chuva, BRILHO_PADRAO, pio, sm);
             vTaskDelay(pdMS_TO_TICKS(50));
@@ -311,7 +311,6 @@ void inicializar_pwms_buzzers()
     pwm_set_enabled(slice_b, false);
 }
 
-
 void draw_ssd1306(uint32_t *_matriz)
 { // FUNÇÃO PARA DESENHAR NO DISPLAY COM O CÓDIGO EXPORTADO DO PISKEL
     for (int i = 0; i < 8192; i++)
@@ -379,7 +378,7 @@ int main()
     // Fim do trecho para modo BOOTSEL com botão B
     stdio_init_all();
 
-    // RODA AS 4 TAREFAS DO SISTEMA
+    // Cria as 8 finas, 2 para cada tarefa que usará elas(a tarefa vLerJoystick apenas alimenta elas, não usa de fato)
     nivel_chuva_display = xQueueCreate(10, sizeof(int));
     nivel_agua_display = xQueueCreate(10, sizeof(int));
     nivel_chuva_buzzer = xQueueCreate(10, sizeof(int));
@@ -388,11 +387,13 @@ int main()
     nivel_agua_led = xQueueCreate(10, sizeof(int));
     nivel_chuva_matriz = xQueueCreate(10, sizeof(int));
     nivel_agua_matriz = xQueueCreate(10, sizeof(int));
-    xTaskCreate(vLerJoystick, "Ler Joystick", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
-    xTaskCreate(vAtualizarDisplay, "Atualiza display", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
-    xTaskCreate(vTocarBuzzer, "Atualiza display", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
-    xTaskCreate(vTaskLed, "Alerta LED", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
-    xTaskCreate(vTaskMatriz, "Alerta Matriz", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+
+    //Faz a chamada das 5 tarefas do sistema
+    xTaskCreate(vLerJoystick, "Ler joystick", 256, NULL, 1, NULL);
+    xTaskCreate(vAtualizarDisplay, "Atualizar display", 256, NULL, 1, NULL);
+    xTaskCreate(vTocarBuzzer, "Tocar buzzer", 256, NULL, 1, NULL);
+    xTaskCreate(vTaskLed, "Alerta Matriz", 256, NULL, 1, NULL);
+    xTaskCreate(vTaskMatriz, "Alerta Matriz", 256, NULL, 1, NULL);
     vTaskStartScheduler();
 
     panic_unsupported();
