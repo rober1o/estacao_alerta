@@ -14,7 +14,7 @@ O projeto tem por finalidade criar um sistema de alerta para cheias, operando do
 
 ## Funcionalidade
 
-Ao inciar o o sistema estára operando no modo normal com valores de nivel de chuva e agua proximo a 50%, tais informações são exibidas em tempo real no display
+Ao inciar o o sistema estára operando no modo normal com valores de volume de chuva e água proximo a 50%, tais informações são exibidas em tempo real no display
 
 🚨 Alerta de Enchente:
 Quando o nível da água for igual ou superior a 70%, o sistema entrará em modo de alerta com os seguintes comportamentos:
@@ -33,7 +33,7 @@ Quando o nível da água for igual ou superior a 70%, o sistema entrará em modo
  -- Mostra o desenho de uma nuvem
 
  🌧️🚨 Alerta de Chuvas Fortes:
-Quando o nível de chuva for igual ou superior a 80%, o sistema entra em modo de alerta com os seguintes comportamentos:
+Quando o volume de chuva for igual ou superior a 80%, o sistema entra em modo de alerta com os seguintes comportamentos:
 
 🔊 Buzzer: emite um som agudo por 50ms, enquanto o nível permanecer acima de 80%.
 

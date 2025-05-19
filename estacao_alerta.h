@@ -54,13 +54,13 @@
 PIO pio;       // Instância do PIO
 int sm;        // Máquina de estado do PIO
 ssd1306_t ssd; // display ssd
-QueueHandle_t nivel_chuva_display;
+QueueHandle_t volume_chuva_display;
 QueueHandle_t nivel_agua_display;
-QueueHandle_t nivel_chuva_buzzer;
+QueueHandle_t volume_chuva_buzzer;
 QueueHandle_t nivel_agua_buzzer;
-QueueHandle_t nivel_chuva_led;
+QueueHandle_t volume_chuva_led;
 QueueHandle_t nivel_agua_led;
-QueueHandle_t nivel_chuva_matriz;
+QueueHandle_t volume_chuva_matriz;
 QueueHandle_t nivel_agua_matriz;
 
 //DECLARAÇÃO FUNÇÕES DE INICALIZAÇÃO

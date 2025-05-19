@@ -13,11 +13,11 @@ void vLerJoystick()
         // Eixo Y (ADC 0)
         adc_select_input(0);
         uint16_t y_pos = adc_read();
-        int percentual_y = (y_pos * 100) / 4095; // pós calcular o percentual de y, passa para as 4 filas do nivel da chuva
-        xQueueSend(nivel_chuva_display, &percentual_y, portMAX_DELAY);
-        xQueueSend(nivel_chuva_buzzer, &percentual_y, portMAX_DELAY);
-        xQueueSend(nivel_chuva_led, &percentual_y, portMAX_DELAY);
-        xQueueSend(nivel_chuva_matriz, &percentual_y, portMAX_DELAY);
+        int percentual_y = (y_pos * 100) / 4095; // pós calcular o percentual de y, passa para as 4 filas do volume da chuva
+        xQueueSend(volume_chuva_display, &percentual_y, portMAX_DELAY);
+        xQueueSend(volume_chuva_buzzer, &percentual_y, portMAX_DELAY);
+        xQueueSend(volume_chuva_led, &percentual_y, portMAX_DELAY);
+        xQueueSend(volume_chuva_matriz, &percentual_y, portMAX_DELAY);
         adc_select_input(1);
         uint16_t x_pos = adc_read();
         int percentual_x = (x_pos * 100) / 4095; // pós calcular o percentual de x, passa para as 4 filas do nivel da água
@@ -40,14 +40,14 @@ void vAtualizarDisplay(void *params) // Tarefa para atualizar o display
     while (true)
     {
         // Bloqueia até receber dados novos para cada fila, sem complicação de contadores
-        if (xQueueReceive(nivel_chuva_display, &valor_chuva, portMAX_DELAY) != pdPASS)
+        if (xQueueReceive(volume_chuva_display, &valor_chuva, portMAX_DELAY) != pdPASS)
             continue;
         if (xQueueReceive(nivel_agua_display, &valor_agua, portMAX_DELAY) != pdPASS)
             continue;
 
         // Atualiza display
         ssd1306_fill(&ssd, false);
-        if (valor_chuva >= 80 && valor_agua >= 70) // Caso o nivel da agua seja maior que 70% e o da chuva seja maior que 80%, imprime uma caveira como sinal de alerta crítico
+        if (valor_chuva >= 80 && valor_agua >= 70) // Caso o nivel da água seja maior que 70% e o da chuva seja maior que 80%, imprime uma caveira como sinal de alerta crítico
         {
             ssd1306_fill(&ssd, false);
             draw_ssd1306(caveira);
@@ -57,13 +57,13 @@ void vAtualizarDisplay(void *params) // Tarefa para atualizar o display
             ssd1306_fill(&ssd, false);
             draw_ssd1306(chuva);
         }
-        else if (valor_agua >= 70) // caso somente a chuva tenha valor acima de 70%, imprime uma casa imundada simbolizando alerta de enchente
+        else if (valor_agua >= 70) // caso somente a água tenha valor acima de 70%, imprime uma casa imundada simbolizando alerta de enchente
         {
             ssd1306_fill(&ssd, false);
             draw_ssd1306(agua);
         }
 
-        if (valor_chuva >= 80 || valor_agua >= 70) // Caso ou a agua ou  achuva passem dos valores normais, imprime a mensagem arleta no display
+        if (valor_chuva >= 80 || valor_agua >= 70) // Caso ou a água ou  achuva passem dos valores normais, imprime a mensagem arleta no display
         {
             snprintf(buffer, sizeof(buffer), "ALERTA!!");
             ssd1306_draw_string(&ssd, buffer, 40, 48);
@@ -76,7 +76,7 @@ void vAtualizarDisplay(void *params) // Tarefa para atualizar o display
 
         ssd1306_rect(&ssd, 3, 3, 122, 60, true, false);
 
-        snprintf(buffer, sizeof(buffer), "CHV: %d%%", valor_chuva); // imprime o nivel da chuva no display
+        snprintf(buffer, sizeof(buffer), "CHV: %d%%", valor_chuva); // imprime o volume da chuva no display
         ssd1306_draw_string(&ssd, buffer, 12, 9);
 
         snprintf(buffer, sizeof(buffer), "AG: %d%%", valor_agua); // imprime o nivel da água no display
@@ -98,7 +98,7 @@ void vTocarBuzzer()
     while (true)
     {
         // Receber os valores da fila do buzzer (bloqueia até ter dado)
-        if (xQueueReceive(nivel_chuva_buzzer, &valor_chuva, portMAX_DELAY) != pdPASS ||
+        if (xQueueReceive(volume_chuva_buzzer, &valor_chuva, portMAX_DELAY) != pdPASS ||
             xQueueReceive(nivel_agua_buzzer, &valor_agua, portMAX_DELAY) != pdPASS)
         {
             // Se falhar, tenta novamente no próximo loop
@@ -128,7 +128,7 @@ void vTaskLed()
     while (true)
     {
         // Receber os valores da fila do buzzer (bloqueia até ter dado)
-        if (xQueueReceive(nivel_chuva_led, &valor_chuva, portMAX_DELAY) != pdPASS ||
+        if (xQueueReceive(volume_chuva_led, &valor_chuva, portMAX_DELAY) != pdPASS ||
             xQueueReceive(nivel_agua_led, &valor_agua, portMAX_DELAY) != pdPASS)
         {
             // Se falhar, tenta novamente no próximo loop
@@ -141,7 +141,7 @@ void vTaskLed()
         {
             piscar_led_vermelho();
         }
-        // se o nivel da chuva for maior que 80%, piscará o led vermelho com periodo de 100ms
+        // se o volume da chuva for maior que 80%, piscará o led vermelho com periodo de 100ms
         if (valor_chuva >= 80)
         {
             piscar_led_azul();
@@ -158,7 +158,7 @@ void vTaskMatriz()
     while (true)
     {
         // Receber os valores da fila do buzzer (bloqueia até ter dado)
-        if (xQueueReceive(nivel_chuva_matriz, &valor_chuva, portMAX_DELAY) != pdPASS ||
+        if (xQueueReceive(volume_chuva_matriz, &valor_chuva, portMAX_DELAY) != pdPASS ||
             xQueueReceive(nivel_agua_matriz, &valor_agua, portMAX_DELAY) != pdPASS)
         {
             // Se falhar, tenta novamente no próximo loop
@@ -178,7 +178,7 @@ void vTaskMatriz()
             vTaskDelay(pdMS_TO_TICKS(50));
             desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
-        else if (valor_chuva >= 80)// se o nivel da chuva for maior que 80%, piscará um quadrado na matriz com periodo de 100ms
+        else if (valor_chuva >= 80)// se o volume da chuva for maior que 80%, piscará um quadrado na matriz com periodo de 100ms
         {
             desenha_fig(alerta_chuva, BRILHO_PADRAO, pio, sm);
             vTaskDelay(pdMS_TO_TICKS(50));
@@ -379,13 +379,13 @@ int main()
     stdio_init_all();
 
     // Cria as 8 finas, 2 para cada tarefa que usará elas(a tarefa vLerJoystick apenas alimenta elas, não usa de fato)
-    nivel_chuva_display = xQueueCreate(10, sizeof(int));
+    volume_chuva_display = xQueueCreate(10, sizeof(int));
     nivel_agua_display = xQueueCreate(10, sizeof(int));
-    nivel_chuva_buzzer = xQueueCreate(10, sizeof(int));
+    volume_chuva_buzzer = xQueueCreate(10, sizeof(int));
     nivel_agua_buzzer = xQueueCreate(10, sizeof(int));
-    nivel_chuva_led = xQueueCreate(10, sizeof(int));
+    volume_chuva_led = xQueueCreate(10, sizeof(int));
     nivel_agua_led = xQueueCreate(10, sizeof(int));
-    nivel_chuva_matriz = xQueueCreate(10, sizeof(int));
+    volume_chuva_matriz = xQueueCreate(10, sizeof(int));
     nivel_agua_matriz = xQueueCreate(10, sizeof(int));
 
     //Faz a chamada das 5 tarefas do sistema
