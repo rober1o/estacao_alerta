@@ -169,19 +169,19 @@ void vTaskMatriz()
         if (valor_agua >= 70 && valor_chuva >= 80)
         {
             desenha_fig(alerta_critico, BRILHO_PADRAO, pio, sm);
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(200));
             desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
         else if (valor_agua >= 70)// se o nivel da água for maior que 70%, piscará uma exclamação na matriz com periodo de 100ms
         {
             desenha_fig(alerta_agua, BRILHO_PADRAO, pio, sm);
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(200));
             desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
         else if (valor_chuva >= 80)// se o volume da chuva for maior que 80%, piscará um quadrado na matriz com periodo de 100ms
         {
             desenha_fig(alerta_chuva, BRILHO_PADRAO, pio, sm);
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(200));
             desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
     }
@@ -354,17 +354,15 @@ void tocar_pwm_buzzer(uint gpio_pin, uint duracao_ms)
 void piscar_led_vermelho()
 {
     gpio_put(LED_VERMELHO, 1); // Liga LED vermelho
-    sleep_ms(50);
+    vTaskDelay(pdMS_TO_TICKS(100));
     gpio_put(LED_VERMELHO, 0); // Desliga LED vermelho
-    sleep_ms(50);
 }
 
 void piscar_led_azul()
 {
     gpio_put(LED_AZUL, 1); // Liga LED azul
-    sleep_ms(50);
+    vTaskDelay(pdMS_TO_TICKS(100));
     gpio_put(LED_AZUL, 0); // Desliga LED azul
-    sleep_ms(50);
 }
 
 int main()

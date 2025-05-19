@@ -21,9 +21,9 @@ Quando o nível da água for igual ou superior a 70%, o sistema entrará em modo
 
 🔊 Buzzer: toca um som grave por 200ms enquanto o nível permanecer acima de 70%.
 
-🔴 LED RGB: pisca em vermelho a cada 100ms.
+🔴 LED RGB: pisca em vermelho com frequencia de 100ms.
 
-💡 Matriz de LEDs: pisca uma exclamação "!" com período de 100ms.
+💡 Matriz de LEDs: pisca uma exclamação "!" com frequencia de 200ms.
 
 🖥️ Display OLED:
 
@@ -37,9 +37,9 @@ Quando o volume de chuva for igual ou superior a 80%, o sistema entra em modo de
 
 🔊 Buzzer: emite um som agudo por 50ms, enquanto o nível permanecer acima de 80%.
 
-🔵 LED RGB: pisca na cor azul a cada 100ms.
+🔵 LED RGB: pisca na cor azul com frequência de 100ms.
 
-💡 Matriz de LEDs: pisca um quadrado com período de 100ms.
+💡 Matriz de LEDs: pisca um quadrado com frequência de 200ms.
 
 🖥️ Display OLED:
 
@@ -52,9 +52,9 @@ Quando o nível de chuva for igual ou superior a 80% e de água igual ou supeiro
 
 🔊 Buzzer: emite um som agudo por 50ms, ao mesmo tempo que o outro buzzer emite um som grave no periodo de 200ms.
 
-🔵 LED RGB: pisca na cor azul a cada 100ms e o vermelho a cada 100ms.
+🔵 LED RGB: pisca na cor azul com frequência de 100ms e o vermelho com frequência de 100 ms.
 
-💡 Matriz de LEDs: pisca um X vermelho com período de 100ms.
+💡 Matriz de LEDs: pisca um X vermelho com frequência de 200ms.
 
 🖥️ Display OLED:
 

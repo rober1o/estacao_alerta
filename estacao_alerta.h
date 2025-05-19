@@ -39,7 +39,7 @@
 // Matriz de LEDs
 #define MATRIZ_PIN 7      // Pino da matriz de LEDs
 #define NUM_PIXELS 25     // Número de pixels na matriz
-#define BRILHO_PADRAO 100 // Brilho padrão
+#define BRILHO_PADRAO 5 // Brilho padrão
 
 // Definições dos LEDs
 #define LED_VERDE 11
