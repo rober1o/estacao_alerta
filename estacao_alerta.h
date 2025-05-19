@@ -61,6 +61,8 @@ QueueHandle_t nivel_chuva_buzzer;
 QueueHandle_t nivel_agua_buzzer;
 QueueHandle_t nivel_chuva_led;
 QueueHandle_t nivel_agua_led;
+QueueHandle_t nivel_chuva_matriz;
+QueueHandle_t nivel_agua_matriz;
 int uso_chuva = 0;
 bool uso_agua = 0;
 bool modo_noturno = false;

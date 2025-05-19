@@ -16,13 +16,15 @@ void vLerJoystick(void *params)
         xQueueSend(nivel_chuva_display, &percentual_y, portMAX_DELAY);
         xQueueSend(nivel_chuva_buzzer, &percentual_y, portMAX_DELAY);
         xQueueSend(nivel_chuva_led, &percentual_y, portMAX_DELAY);
+        xQueueSend(nivel_chuva_matriz, &percentual_y, portMAX_DELAY);
         adc_select_input(1);
         uint16_t x_pos = adc_read();
         int percentual_x = (x_pos * 100) / 4095;
         xQueueSend(nivel_agua_display, &percentual_x, portMAX_DELAY);
         xQueueSend(nivel_agua_buzzer, &percentual_x, portMAX_DELAY);
         xQueueSend(nivel_agua_led, &percentual_x, portMAX_DELAY);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        xQueueSend(nivel_agua_matriz, &percentual_x, portMAX_DELAY);
+        vTaskDelay(pdMS_TO_TICKS(300));
     }
 }
 
@@ -140,6 +142,43 @@ void vTaskLed(void *params)
         if (valor_chuva >= 80)
         {
             piscar_led_azul();
+        }
+    }
+}
+
+void vTaskMatriz(void *params)
+{
+    int valor_chuva = 0;
+    int valor_agua = 0;
+
+    while (true)
+    {
+        // Receber os valores da fila do buzzer (bloqueia até ter dado)
+        if (xQueueReceive(nivel_chuva_matriz, &valor_chuva, portMAX_DELAY) != pdPASS ||
+            xQueueReceive(nivel_agua_matriz, &valor_agua, portMAX_DELAY) != pdPASS)
+        {
+            // Se falhar, tenta novamente no próximo loop
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+
+        if (valor_agua >= 70 && valor_chuva >= 80)
+        {
+            desenha_fig(alerta_critico, BRILHO_PADRAO, pio, sm);
+            vTaskDelay(pdMS_TO_TICKS(50));
+            desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
+        }
+        else if (valor_agua >= 70)
+        {
+            desenha_fig(alerta_agua, BRILHO_PADRAO, pio, sm);
+            vTaskDelay(pdMS_TO_TICKS(50));
+            desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
+        }
+        else if (valor_chuva >= 80)
+        {
+            desenha_fig(alerta_chuva, BRILHO_PADRAO, pio, sm);
+            vTaskDelay(pdMS_TO_TICKS(50));
+            desenha_fig(matriz_apagada, BRILHO_PADRAO, pio, sm);
         }
     }
 }
@@ -345,10 +384,13 @@ int main()
     nivel_agua_buzzer = xQueueCreate(10, sizeof(int));
     nivel_chuva_led = xQueueCreate(10, sizeof(int));
     nivel_agua_led = xQueueCreate(10, sizeof(int));
+    nivel_chuva_matriz = xQueueCreate(10, sizeof(int));
+    nivel_agua_matriz = xQueueCreate(10, sizeof(int));
     xTaskCreate(vLerJoystick, "Ler Joystick", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(vAtualizarDisplay, "Atualiza display", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(vTocarBuzzer, "Atualiza display", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(vTaskLed, "Alerta LED", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+    xTaskCreate(vTaskMatriz, "Alerta Matriz", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     vTaskStartScheduler();
 
     panic_unsupported();
