@@ -46,7 +46,6 @@
 #define LED_VERMELHO 13
 #define LED_AZUL 12
 #define BOTAO_A 5
-#define NUM_PERIFERICOS 2
 // definições Joystick
 
 #define ADC_JOYSTICK_Y 27
@@ -57,13 +56,13 @@ PIO pio;       // Instância do PIO
 int sm;        // Máquina de estado do PIO
 ssd1306_t ssd; // display ssd
 QueueHandle_t nivel_chuva_display;
-QueueHandle_t nivel_enchente_display;
+QueueHandle_t nivel_agua_display;
 QueueHandle_t nivel_chuva_buzzer;
-QueueHandle_t nivel_enchente_buzzer;
+QueueHandle_t nivel_agua_buzzer;
 QueueHandle_t nivel_chuva_led;
-QueueHandle_t nivel_enchente_led;
+QueueHandle_t nivel_agua_led;
 int uso_chuva = 0;
-bool uso_enchente = 0;
+bool uso_agua = 0;
 bool modo_noturno = false;
 
 void inicializar_pinos_adc();

@@ -19,9 +19,9 @@ void vLerJoystick(void *params)
         adc_select_input(1);
         uint16_t x_pos = adc_read();
         int percentual_x = (x_pos * 100) / 4095;
-        xQueueSend(nivel_enchente_display, &percentual_x, portMAX_DELAY);
-        xQueueSend(nivel_enchente_buzzer, &percentual_x, portMAX_DELAY);
-        xQueueSend(nivel_enchente_led, &percentual_x, portMAX_DELAY);
+        xQueueSend(nivel_agua_display, &percentual_x, portMAX_DELAY);
+        xQueueSend(nivel_agua_buzzer, &percentual_x, portMAX_DELAY);
+        xQueueSend(nivel_agua_led, &percentual_x, portMAX_DELAY);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
@@ -31,7 +31,7 @@ void vAtualizarDisplay(void *params)
     inicializar_display_i2c();
 
     int valor_chuva = 0;
-    int valor_enchente = 0;
+    int valor_agua = 0;
     char buffer[20];
 
     while (true)
@@ -39,35 +39,63 @@ void vAtualizarDisplay(void *params)
         // Bloqueia até receber dados novos para cada fila, sem complicação de contadores
         if (xQueueReceive(nivel_chuva_display, &valor_chuva, portMAX_DELAY) != pdPASS)
             continue;
-        if (xQueueReceive(nivel_enchente_display, &valor_enchente, portMAX_DELAY) != pdPASS)
+        if (xQueueReceive(nivel_agua_display, &valor_agua, portMAX_DELAY) != pdPASS)
             continue;
 
         // Atualiza display
         ssd1306_fill(&ssd, false);
+        if (valor_chuva >= 80 && valor_agua >= 70)
+        {
+            ssd1306_fill(&ssd, false);
+            draw_ssd1306(caveira);
+        }
+        else if (valor_chuva >= 80)
+        {
+            ssd1306_fill(&ssd, false);
+            draw_ssd1306(chuva);
+        }
+        else if (valor_agua >= 70)
+        {
+            ssd1306_fill(&ssd, false);
+            draw_ssd1306(agua);
+        }
+
+        if (valor_chuva >= 80 || valor_agua >= 70)
+        {
+            snprintf(buffer, sizeof(buffer), "ALERTA!!");
+            ssd1306_draw_string(&ssd, buffer, 40, 48); // <-- Adicionado aqui
+        }
+        else
+        {
+            snprintf(buffer, sizeof(buffer), "NORMAL");
+            ssd1306_draw_string(&ssd, buffer, 40, 48); // <-- Adicionado aqui
+        }
+
         ssd1306_rect(&ssd, 3, 3, 122, 60, true, false);
 
-        snprintf(buffer, sizeof(buffer), "Chuva: %d%%", valor_chuva);
-        ssd1306_draw_string(&ssd, buffer, 12, 15);
+        snprintf(buffer, sizeof(buffer), "CHV: %d%%", valor_chuva);
+        ssd1306_draw_string(&ssd, buffer, 12, 9);
 
-        snprintf(buffer, sizeof(buffer), "Enchente: %d%%", valor_enchente);
-        ssd1306_draw_string(&ssd, buffer, 12, 40);
-
+        snprintf(buffer, sizeof(buffer), "AG: %d%%", valor_agua);
+        ssd1306_draw_string(&ssd, buffer, 12, 25);
+        ssd1306_rect(&ssd, 40, 4, 121, 1, true, false);
+        ssd1306_rect(&ssd, 4, 80, 1, 37, true, false);
         ssd1306_send_data(&ssd);
 
-        vTaskDelay(pdMS_TO_TICKS(300));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
 void vTocarBuzzer(void *params)
 {
     int valor_chuva = 0;
-    int valor_enchente = 0;
+    int valor_agua = 0;
 
     while (true)
     {
         // Receber os valores da fila do buzzer (bloqueia até ter dado)
         if (xQueueReceive(nivel_chuva_buzzer, &valor_chuva, portMAX_DELAY) != pdPASS ||
-            xQueueReceive(nivel_enchente_buzzer, &valor_enchente, portMAX_DELAY) != pdPASS)
+            xQueueReceive(nivel_agua_buzzer, &valor_agua, portMAX_DELAY) != pdPASS)
         {
             // Se falhar, tenta novamente no próximo loop
             vTaskDelay(pdMS_TO_TICKS(100));
@@ -75,7 +103,7 @@ void vTocarBuzzer(void *params)
         }
 
         // Checar condições para tocar buzzer
-        if (valor_enchente >= 70)
+        if (valor_agua >= 70)
         {
             tocar_pwm_buzzer(BUZZER_A, 100);
         }
@@ -90,13 +118,13 @@ void vTocarBuzzer(void *params)
 void vTaskLed(void *params)
 {
     int valor_chuva = 0;
-    int valor_enchente = 0;
+    int valor_agua = 0;
 
     while (true)
     {
         // Receber os valores da fila do buzzer (bloqueia até ter dado)
         if (xQueueReceive(nivel_chuva_led, &valor_chuva, portMAX_DELAY) != pdPASS ||
-            xQueueReceive(nivel_enchente_led, &valor_enchente, portMAX_DELAY) != pdPASS)
+            xQueueReceive(nivel_agua_led, &valor_agua, portMAX_DELAY) != pdPASS)
         {
             // Se falhar, tenta novamente no próximo loop
             vTaskDelay(pdMS_TO_TICKS(100));
@@ -104,7 +132,7 @@ void vTaskLed(void *params)
         }
 
         // Checar condições para tocar buzzer
-        if (valor_enchente >= 70)
+        if (valor_agua >= 70)
         {
             piscar_led_vermelho();
         }
@@ -281,20 +309,19 @@ void tocar_pwm_buzzer(uint gpio_pin, uint duracao_ms)
     printf("vTocarBuzzer rodando\n");
 }
 
-
 void piscar_led_vermelho()
 {
-    gpio_put(LED_VERMELHO, 1);  // Liga LED vermelho
+    gpio_put(LED_VERMELHO, 1); // Liga LED vermelho
     sleep_ms(50);
-    gpio_put(LED_VERMELHO, 0);  // Desliga LED vermelho
+    gpio_put(LED_VERMELHO, 0); // Desliga LED vermelho
     sleep_ms(50);
 }
 
 void piscar_led_azul()
 {
-    gpio_put(LED_AZUL, 1);       // Liga LED azul
+    gpio_put(LED_AZUL, 1); // Liga LED azul
     sleep_ms(50);
-    gpio_put(LED_AZUL, 0);       // Desliga LED azul
+    gpio_put(LED_AZUL, 0); // Desliga LED azul
     sleep_ms(50);
 }
 
@@ -302,6 +329,7 @@ int main()
 {
     inicializar_pwms_buzzers();
     inicializar_leds();
+    configurar_matriz_leds();
     // Para ser utilizado o modo BOOTSEL com botão B
     gpio_init(botaoB);
     gpio_set_dir(botaoB, GPIO_IN);
@@ -312,11 +340,11 @@ int main()
     inicializar_pinos_adc();
     // RODA AS 4 TAREFAS DO SISTEMA
     nivel_chuva_display = xQueueCreate(10, sizeof(int));
-    nivel_enchente_display = xQueueCreate(10, sizeof(int));
+    nivel_agua_display = xQueueCreate(10, sizeof(int));
     nivel_chuva_buzzer = xQueueCreate(10, sizeof(int));
-    nivel_enchente_buzzer = xQueueCreate(10, sizeof(int));
+    nivel_agua_buzzer = xQueueCreate(10, sizeof(int));
     nivel_chuva_led = xQueueCreate(10, sizeof(int));
-    nivel_enchente_led = xQueueCreate(10, sizeof(int));
+    nivel_agua_led = xQueueCreate(10, sizeof(int));
     xTaskCreate(vLerJoystick, "Ler Joystick", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(vAtualizarDisplay, "Atualiza display", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     xTaskCreate(vTocarBuzzer, "Atualiza display", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
